@@ -9,10 +9,11 @@ class Guru extends Model
     protected $table = 'guru';
     protected $primaryKey = 'id_guru';
     protected $fillable = [
-    'id_user', 'nik', 'nama_guru', 'no_telp', 'alamat',
-    'jenis_kelamin', 'tanggal_lahir', 'nip', 
-    'nama_lembaga', 'jabatan', 'surat_tugas'
-];
+        'id_user', 'nik', 'nama_guru', 'no_telp', 'alamat',
+        'jenis_kelamin', 'tanggal_lahir', 'nip',
+        'nama_lembaga', 'jabatan', 'surat_tugas',
+        'email', // ← tambah ini
+    ];
 
     public function user()
     {

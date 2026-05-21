@@ -1,9 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Guru;
 use App\Models\OrangTua;
+use App\Models\Anak;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -45,6 +48,7 @@ class AuthController extends Controller
                     'nik'          => $request->nik,
                     'nama_guru'    => $request->nama,
                     'no_telp'      => $request->no_telp,
+                    'email'        => $user->email, // FIX: sinkronisasi email dari users
                     'nip'          => $request->nip,
                     'nama_lembaga' => $request->nama_lembaga,
                     'jabatan'      => $request->jabatan,
@@ -55,25 +59,39 @@ class AuthController extends Controller
             }
 
             if ($request->role === 'orang_tua') {
-                $fotoKtpPath = null;
-                if ($request->hasFile('foto_ktp')) {
-                    $fotoKtpPath = $request->file('foto_ktp')->store('foto_ktp', 'public');
-                }
 
-                OrangTua::create([
-                    'id_user'      => $user->id,
-                    'nik'          => $request->nik,
-                    'nama_orangtua'=> $request->nama,
-                    'no_telp'      => $request->no_telp,
-                    'alamat'       => $request->alamat,
-                    'pekerjaan'    => $request->pekerjaan,
-                    'hubungan'     => $request->hubungan,
-                    'nama_anak'    => $request->nama_anak,
-                    'kelas_anak'   => $request->kelas_anak,
-                    'foto_ktp'     => $fotoKtpPath,
-                ]);
-            }
+    $fotoKtpPath = null;
 
+    if ($request->hasFile('foto_ktp')) {
+        $fotoKtpPath = $request->file('foto_ktp')->store('foto_ktp', 'public');
+    }
+
+    // simpan data orang tua
+    $orangTua = OrangTua::create([
+        'id_user'       => $user->id,
+        'nik'           => $request->nik,
+        'nama_orangtua' => $request->nama,
+        'no_telp'       => $request->no_telp,
+        'alamat'        => $request->alamat,
+        'pekerjaan'     => $request->pekerjaan,
+        'hubungan'      => $request->hubungan,
+        'nama_anak'     => $request->nama_anak,
+        'kelas_anak'    => $request->kelas_anak,
+        'foto_ktp'      => $fotoKtpPath,
+    ]);
+
+    // cari id_kelas berdasarkan nama kelas
+    $kelas = Kelas::where('nama_kelas', $request->kelas_anak)->first();
+
+    // simpan data anak
+    Anak::create([
+        'id_kelas'      => $kelas ? $kelas->id_kelas : null,
+        'id_orangtua'   => $orangTua->id_orangtua,
+        'nama_anak'     => $request->nama_anak,
+        'jenis_kelamin' => 'L',
+        'tanggal_lahir' => null,
+    ]);
+}
             DB::commit();
 
             return response()->json([
@@ -159,44 +177,46 @@ class AuthController extends Controller
     }
 
     public function updateProfile(Request $request)
-{
-    $user = $request->user();
+    {
+        $user = $request->user();
 
-    $request->validate([
-        'username'  => 'required|string|unique:users,username,' . $user->id,
-        'email'     => 'required|email|unique:users,email,' . $user->id,
-        'nama'      => 'required|string',
-        'nik'       => 'required|string|size:16',
-        'no_telp'   => 'nullable|string',
-        'alamat'    => 'nullable|string',
-        'jenis_kelamin' => 'nullable|in:L,P',
-        'tanggal_lahir' => 'nullable|date',
-        'password'  => 'nullable|min:6',
-    ]);
+        $request->validate([
+            'username'      => 'required|string|unique:users,username,' . $user->id,
+            'email'         => 'required|email|unique:users,email,' . $user->id,
+            'nama'          => 'required|string',
+            'nik'           => 'required|string|size:16',
+            'no_telp'       => 'nullable|string',
+            'alamat'        => 'nullable|string',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'tanggal_lahir' => 'nullable|date',
+            'password'      => 'nullable|min:6',
+        ]);
 
-    // Update tabel users
-    $user->username = $request->username;
-    $user->email    = $request->email;
-    if ($request->password) {
-        $user->password = \Hash::make($request->password);
-    }
-    $user->save();
+        // Update tabel users
+        $user->username = $request->username;
+        $user->email    = $request->email;
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save();
 
-    // Update tabel guru
-    if ($user->role === 'guru') {
-        $user->guru()->update([
-            'nama_guru'     => $request->nama,
-            'nik'           => $request->nik,
-            'no_telp'       => $request->no_telp,
-            'alamat'        => $request->alamat,
-            'jenis_kelamin' => $request->jenis_kelamin,
-            'tanggal_lahir' => $request->tanggal_lahir,
+        // Update tabel guru
+        if ($user->role === 'guru') {
+            $user->guru()->update([
+                'nama_guru'     => $request->nama,
+                'nik'           => $request->nik,
+                'no_telp'       => $request->no_telp,
+                'alamat'        => $request->alamat,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'tanggal_lahir' => $request->tanggal_lahir,
+                'email'         => $request->email, 
+               
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui',
         ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Profil berhasil diperbarui',
-    ]);
-}
 }

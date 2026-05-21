@@ -8,12 +8,7 @@ class Kelas extends Model
 {
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
-    protected $fillable = ['id_guru', 'nama_kelas', 'tahun_ajaran'];
-
-    public function guru()
-    {
-        return $this->belongsTo(Guru::class, 'id_guru');
-    }
+    protected $fillable = ['nama_kelas', 'wali_kelas', 'tahun_ajaran'];
 
     public function anak()
     {
