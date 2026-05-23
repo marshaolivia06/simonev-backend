@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\AnakController;
+use App\Http\Controllers\OrangTuaController;
 use App\Http\Controllers\VerifikasiController;
 use App\Http\Controllers\ProfilSekolahController;
 use App\Http\Controllers\AspekPerkembanganController;
@@ -16,7 +17,6 @@ Route::post('/login',    [AuthController::class, 'login']);
 
 Route::get('/kelas', [KelasController::class, 'index']);
 
-// Pengumuman bisa dibaca publik (orang tua & guru yang belum login pun bisa lihat)
 Route::get('/pengumuman',       [PengumumanController::class, 'index']);
 Route::get('/pengumuman/{id}',  [PengumumanController::class, 'show']);
 
@@ -46,6 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/anak/{id}',    [AnakController::class, 'update']);
     Route::delete('/anak/{id}', [AnakController::class, 'destroy']);
 
+    // Orang Tua
+    Route::get('/orang-tua',         [OrangTuaController::class, 'index']);
+    Route::get('/orang-tua/{id}',    [OrangTuaController::class, 'show']);
+    Route::put('/orang-tua/{id}',    [OrangTuaController::class, 'update']);
+    Route::delete('/orang-tua/{id}', [OrangTuaController::class, 'destroy']);
+
     // Profil Sekolah
     Route::get('/profil-sekolah', [ProfilSekolahController::class, 'show']);
     Route::put('/profil-sekolah', [ProfilSekolahController::class, 'update']);
@@ -70,15 +76,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/indikator/{id}',  [IndikatorPenilaianController::class, 'destroy']);
 
     // Observasi
-    Route::get('/observasi',                 [ObservasiController::class, 'index']);
-    Route::post('/observasi',                [ObservasiController::class, 'store']);
-    Route::get('/observasi/anak/{id_anak}',  [ObservasiController::class, 'byAnak']);
-    Route::get('/observasi/{id}',            [ObservasiController::class, 'show']);
-    Route::put('/observasi/{id}',            [ObservasiController::class, 'update']);
-    Route::delete('/observasi/{id}',         [ObservasiController::class, 'destroy']);
+    Route::get('/observasi',                [ObservasiController::class, 'index']);
+    Route::post('/observasi',               [ObservasiController::class, 'store']);
+    Route::get('/observasi/anak/{id_anak}', [ObservasiController::class, 'byAnak']);
+    Route::get('/observasi/{id}',           [ObservasiController::class, 'show']);
+    Route::put('/observasi/{id}',           [ObservasiController::class, 'update']);
+    Route::delete('/observasi/{id}',        [ObservasiController::class, 'destroy']);
 
-    // Pengumuman — hanya admin yang bisa tambah/edit/hapus
-    Route::post('/pengumuman',          [PengumumanController::class, 'store']);
-    Route::put('/pengumuman/{id}',      [PengumumanController::class, 'update']);
-    Route::delete('/pengumuman/{id}',   [PengumumanController::class, 'destroy']);
+    // Pengumuman
+    Route::post('/pengumuman',        [PengumumanController::class, 'store']);
+    Route::put('/pengumuman/{id}',    [PengumumanController::class, 'update']);
+    Route::delete('/pengumuman/{id}', [PengumumanController::class, 'destroy']);
 });
