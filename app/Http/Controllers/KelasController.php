@@ -9,8 +9,8 @@ class KelasController extends Controller
 {
     public function index()
     {
-        $data = Kelas::all();
-        return response()->json(['success' => true, 'data' => $data]);
+        $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
+        return response()->json(['success' => true, 'data' => $kelas]);
     }
 
     public function store(Request $request)

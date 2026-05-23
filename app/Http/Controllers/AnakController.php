@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Anak;
@@ -8,7 +9,7 @@ class AnakController extends Controller
 {
     public function index()
     {
-        $data = Anak::with('kelas', 'orangTua')->get();
+        $data = Anak::with('kelas', 'orangTua.user')->get();
         return response()->json(['success' => true, 'data' => $data]);
     }
 
@@ -28,7 +29,7 @@ class AnakController extends Controller
 
     public function show($id)
     {
-        $data = Anak::with('kelas', 'orangTua', 'observasi')->findOrFail($id);
+        $data = Anak::with('kelas', 'orangTua.user', 'observasi')->findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
 
