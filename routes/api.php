@@ -15,8 +15,6 @@ use App\Http\Controllers\PengumumanController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
 
-Route::get('/kelas', [KelasController::class, 'index']);
-
 Route::get('/pengumuman',       [PengumumanController::class, 'index']);
 Route::get('/pengumuman/{id}',  [PengumumanController::class, 'show']);
 
@@ -28,12 +26,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profil',   [AuthController::class, 'updateProfile']);
 
     // Guru
+    Route::get('/dashboard-guru', [GuruController::class, 'dashboard']);
     Route::get('/guru',           [GuruController::class, 'index']);
     Route::get('/guru/{id}',      [GuruController::class, 'show']);
     Route::put('/guru/{guru}',    [GuruController::class, 'update']);
     Route::delete('/guru/{guru}', [GuruController::class, 'destroy']);
 
     // Kelas
+    Route::get('/kelas', [KelasController::class, 'index']);
     Route::get('/kelas/{id}',      [KelasController::class, 'show']);
     Route::post('/kelas',          [KelasController::class, 'store']);
     Route::put('/kelas/{id}',      [KelasController::class, 'update']);
@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/verifikasi',              [VerifikasiController::class, 'index']);
     Route::post('/verifikasi/{id}/accept', [VerifikasiController::class, 'accept']);
     Route::post('/verifikasi/{id}/reject', [VerifikasiController::class, 'reject']);
+    Route::delete('/verifikasi/{id}', [VerifikasiController::class, 'destroy']);
 
     // Aspek Perkembangan
     Route::get('/aspek',          [AspekPerkembanganController::class, 'index']);
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Observasi
     Route::get('/observasi',                [ObservasiController::class, 'index']);
     Route::post('/observasi',               [ObservasiController::class, 'store']);
+    Route::post('/observasi/batch', [ObservasiController::class, 'storeBatch']);
     Route::get('/observasi/anak/{id_anak}', [ObservasiController::class, 'byAnak']);
     Route::get('/observasi/{id}',           [ObservasiController::class, 'show']);
     Route::put('/observasi/{id}',           [ObservasiController::class, 'update']);

@@ -7,11 +7,30 @@ use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
-    public function index()
-    {
-        $kelas = Kelas::orderBy('nama_kelas', 'asc')->get();
-        return response()->json(['success' => true, 'data' => $kelas]);
+    public function index(Request $request)
+{
+    $user = $request->user();
+
+    // Admin → ambil semua kelas
+    if ($user && $user->role === 'admin') {
+        $data = Kelas::orderBy('nama_kelas', 'asc')->get();
+        return response()->json(['success' => true, 'data' => $data]);
     }
+
+    // Guru → filter by wali_kelas (nama guru)
+    if ($user && $user->role === 'guru') {
+        $guru = $user->guru;
+        if ($guru) {
+            $data = Kelas::where('wali_kelas', $guru->nama_guru)
+                         ->orderBy('nama_kelas', 'asc')
+                         ->get();
+            return response()->json(['success' => true, 'data' => $data]);
+        }
+    }
+
+    // Fallback — tidak ada data
+    return response()->json(['success' => true, 'data' => []]);
+}
 
     public function store(Request $request)
     {

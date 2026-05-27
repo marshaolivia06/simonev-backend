@@ -8,10 +8,15 @@ class Kelas extends Model
 {
     protected $table = 'kelas';
     protected $primaryKey = 'id_kelas';
-    protected $fillable = ['nama_kelas', 'wali_kelas', 'tahun_ajaran'];
+    protected $fillable = ['id_guru', 'nama_kelas', 'tahun_ajaran']; // tambah id_guru, hapus wali_kelas
+
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class, 'id_guru', 'id_guru'); // tambah relasi ini
+    }
 
     public function anak()
     {
-        return $this->hasMany(Anak::class, 'id_kelas');
+        return $this->hasMany(Anak::class, 'id_kelas', 'id_kelas');
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
 {
-    // GET /api/guru
     public function index()
     {
         $data = Guru::with('user')
@@ -21,14 +20,12 @@ class GuruController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
-    // GET /api/guru/{id}
     public function show($id)
     {
         $data = Guru::with('user', 'kelas', 'observasi')->findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
 
-    // POST /api/guru
     public function store(Request $request)
     {
         $request->validate([
@@ -37,22 +34,18 @@ class GuruController extends Controller
             'nama_guru'     => 'required|string|max:255',
             'jenis_kelamin' => 'required|in:L,P',
             'no_telp'       => 'nullable|string|max:20',
-            'email'         => 'nullable|email|unique:guru,email',
             'alamat'        => 'nullable|string',
             'tanggal_lahir' => 'nullable|date',
             'nama_lembaga'  => 'nullable|string|max:255',
             'jabatan'       => 'nullable|string|max:255',
         ]);
 
-        // PERBAIKAN: ganti $request->only() → $request->input() per field
-        // supaya id_user tetap masuk sebagai NULL jika tidak dikirim
         $data = Guru::create([
-            'id_user'       => $request->input('id_user'),       // NULL jika tidak dikirim ✓
+            'id_user'       => $request->input('id_user'),
             'nik'           => $request->input('nik'),
             'nama_guru'     => $request->input('nama_guru'),
             'jenis_kelamin' => $request->input('jenis_kelamin'),
             'no_telp'       => $request->input('no_telp'),
-            'email'         => $request->input('email'),
             'alamat'        => $request->input('alamat'),
             'tanggal_lahir' => $request->input('tanggal_lahir'),
             'nama_lembaga'  => $request->input('nama_lembaga'),
@@ -66,7 +59,6 @@ class GuruController extends Controller
         ], 201);
     }
 
-    // PUT /api/guru/{guru}
     public function update(Request $request, Guru $guru)
     {
         $request->validate([
@@ -76,18 +68,15 @@ class GuruController extends Controller
             'nama_guru'     => 'sometimes|string|max:255',
             'jenis_kelamin' => 'sometimes|in:L,P',
             'no_telp'       => 'nullable|string|max:20',
-            'email'         => ['nullable', 'email',
-                                Rule::unique('guru', 'email')->ignore($guru->id_guru, 'id_guru')],
             'alamat'        => 'nullable|string',
             'tanggal_lahir' => 'nullable|date',
             'nama_lembaga'  => 'nullable|string|max:255',
             'jabatan'       => 'nullable|string|max:255',
         ]);
 
-        // update() pakai only() tetap aman karena hanya update field yang dikirim saja
         $guru->update($request->only([
             'id_user', 'nik', 'nama_guru', 'jenis_kelamin',
-            'no_telp', 'email', 'alamat', 'tanggal_lahir',
+            'no_telp', 'alamat', 'tanggal_lahir',
             'nama_lembaga', 'jabatan',
         ]));
 
@@ -98,7 +87,6 @@ class GuruController extends Controller
         ]);
     }
 
-    // DELETE /api/guru/{guru}
     public function destroy(Guru $guru)
     {
         $guru->delete();
@@ -107,4 +95,44 @@ class GuruController extends Controller
             'message' => 'Data guru berhasil dihapus.',
         ]);
     }
+
+    public function dashboard(Request $request)
+{
+    $guru = $request->user();
+
+    // Ambil kelas yang diajar guru ini
+    $kelas = \App\Models\Kelas::where('wali_kelas', $guru->id)->first();
+
+    if (!$kelas) {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_anak' => 0,
+                'BB' => 0, 'MB' => 0, 'BSH' => 0, 'BSB' => 0,
+            ]
+        ]);
+    }
+
+    // Ambil semua anak di kelas ini
+    $idAnak = \App\Models\Anak::where('id_kelas', $kelas->id_kelas)->pluck('id_anak');
+    $totalAnak = $idAnak->count();
+
+    // Hitung nilai dari observasi
+    $nilai = \App\Models\Observasi::whereIn('id_anak', $idAnak)
+        ->selectRaw('nilai, COUNT(*) as jumlah')
+        ->groupBy('nilai')
+        ->pluck('jumlah', 'nilai');
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'nama_kelas'  => $kelas->nama_kelas,
+            'total_anak'  => $totalAnak,
+            'BB'  => $nilai['BB']  ?? 0,
+            'MB'  => $nilai['MB']  ?? 0,
+            'BSH' => $nilai['BSH'] ?? 0,
+            'BSB' => $nilai['BSB'] ?? 0,
+        ]
+    ]);
+}
 }

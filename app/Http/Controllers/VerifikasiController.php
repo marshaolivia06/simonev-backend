@@ -11,6 +11,7 @@ class VerifikasiController extends Controller
     {
         $data = User::with(['guru', 'orangTua'])
                     ->whereIn('status', ['pending', 'approved', 'rejected'])
+                    ->where('role', '!=', 'admin')
                     ->orderBy('created_at', 'desc')
                     ->get()
                     ->map(function ($user) {
@@ -73,4 +74,15 @@ class VerifikasiController extends Controller
             'message' => "Akun {$user->username} berhasil ditolak.",
         ]);
     }
+
+    public function destroy($id)
+{
+    $user = User::findOrFail($id);
+    $user->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Akun berhasil dihapus.',
+    ]);
+}
 }
