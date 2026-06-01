@@ -65,6 +65,40 @@ class ObservasiController extends Controller
         return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
     }
 
+    public function storeBatch(Request $request)
+{
+    $request->validate([
+        'id_anak'                  => 'required|exists:anak,id_anak',
+        'semester'                 => 'required|string',
+        'tanggal'                  => 'required|date',
+        'komentar'                 => 'nullable|string',
+        'penilaian'                => 'required|array|min:1',
+        'penilaian.*.id_indikator' => 'required|exists:indikator_penilaian,id_indikator',
+        'penilaian.*.nilai'        => 'required|in:BB,MB,BSH,BSB',
+    ]);
+
+    $idGuru = auth()->user()->guru->id_guru;
+
+    $saved = [];
+    foreach ($request->penilaian as $item) {
+        $saved[] = Observasi::create([
+            'id_guru'      => $idGuru,
+            'id_anak'      => $request->id_anak,
+            'id_indikator' => $item['id_indikator'],
+            'nilai'        => $item['nilai'],
+            'foto'         => $item['foto'] ?? null,
+            'semester'     => $request->semester,
+            'tanggal'      => $request->tanggal,
+            'komentar'     => $request->komentar ?? null,
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'data'    => $saved,
+    ], 201);
+}
+
     // ← endpoint khusus untuk halaman laporan
     // GET /observasi/anak/{id_anak}?semester=Semester 1
     public function byAnak($id_anak, Request $request)

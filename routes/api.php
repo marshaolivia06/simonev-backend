@@ -18,6 +18,8 @@ Route::post('/login',    [AuthController::class, 'login']);
 Route::get('/pengumuman',       [PengumumanController::class, 'index']);
 Route::get('/pengumuman/{id}',  [PengumumanController::class, 'show']);
 
+Route::get('/kelas', [KelasController::class, 'index']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
@@ -33,7 +35,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/guru/{guru}', [GuruController::class, 'destroy']);
 
     // Kelas
-    Route::get('/kelas', [KelasController::class, 'index']);
     Route::get('/kelas/{id}',      [KelasController::class, 'show']);
     Route::post('/kelas',          [KelasController::class, 'store']);
     Route::put('/kelas/{id}',      [KelasController::class, 'update']);
@@ -48,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Orang Tua
     Route::get('/orang-tua',         [OrangTuaController::class, 'index']);
+    Route::get('/orang-tua/profil/anak', [OrangTuaController::class, 'profilAnak']); 
     Route::get('/orang-tua/{id}',    [OrangTuaController::class, 'show']);
     Route::put('/orang-tua/{id}',    [OrangTuaController::class, 'update']);
     Route::delete('/orang-tua/{id}', [OrangTuaController::class, 'destroy']);

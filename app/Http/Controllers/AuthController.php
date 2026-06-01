@@ -70,7 +70,7 @@ class AuthController extends Controller
                     'alamat'        => $request->alamat,
                     'tanggal_lahir' => $request->tanggal_lahir,
                     'surat_tugas'   => $suratTugasPath,
-                    'jenis_kelamin' => $request->jenis_kelamin ?? 'L',
+                    'jenis_kelamin' => $request->jenis_kelamin ?? null,
                 ]);
             }
 
@@ -107,7 +107,7 @@ class AuthController extends Controller
                     'id_kelas'      => $kelas->id_kelas,
                     'id_orangtua'   => $orangTua->id_orangtua,
                     'nama_anak'     => $request->nama_anak,
-                    'jenis_kelamin' => $request->jenis_kelamin ?? 'L',
+                    'jenis_kelamin' => $request->jenis_kelamin ?? null,
                     'tanggal_lahir' => $request->tanggal_lahir_anak,
                 ]);
             }

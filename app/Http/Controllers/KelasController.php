@@ -11,14 +11,20 @@ class KelasController extends Controller
 {
     $user = $request->user();
 
+    // ← TAMBAH INI: akses publik (saat register, belum login)
+    if (!$user) {
+        $data = Kelas::orderBy('nama_kelas', 'asc')->get();
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
     // Admin → ambil semua kelas
-    if ($user && $user->role === 'admin') {
+    if ($user->role === 'admin') {
         $data = Kelas::orderBy('nama_kelas', 'asc')->get();
         return response()->json(['success' => true, 'data' => $data]);
     }
 
     // Guru → filter by wali_kelas (nama guru)
-    if ($user && $user->role === 'guru') {
+    if ($user->role === 'guru') {
         $guru = $user->guru;
         if ($guru) {
             $data = Kelas::where('wali_kelas', $guru->nama_guru)
@@ -28,7 +34,7 @@ class KelasController extends Controller
         }
     }
 
-    // Fallback — tidak ada data
+    // Fallback
     return response()->json(['success' => true, 'data' => []]);
 }
 
@@ -36,7 +42,7 @@ class KelasController extends Controller
     {
         $request->validate([
             'nama_kelas'   => 'required|string',
-            'wali_kelas'   => 'required|string',
+            'wali_kelas'   => 'nullable|string',
             'tahun_ajaran' => 'required|string',
         ]);
 

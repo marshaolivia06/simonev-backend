@@ -44,5 +44,20 @@ class OrangTuaController extends Controller
     {
         OrangTua::findOrFail($id)->delete();
         return response()->json(['success' => true, 'message' => 'Data berhasil dihapus']);
+    }   
+
+    
+    public function profilAnak(Request $request)
+    {
+        $user = $request->user();
+
+        $orangTua = OrangTua::with('anak.kelas')
+            ->where('id_user', $user->id)
+            ->first();
+
+        return response()->json([
+    'success' => true,
+    'data'    => $orangTua ? $orangTua->anak : null
+]);
     }
 }
