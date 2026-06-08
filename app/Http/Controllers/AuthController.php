@@ -10,11 +10,11 @@ use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
-    // ← PERUBAHAN: endpoint baru untuk ambil daftar kelas
     public function getKelas()
     {
         $kelas = Kelas::all(['id_kelas', 'nama_kelas']);
@@ -80,35 +80,18 @@ class AuthController extends Controller
                     $fotoKtpPath = $request->file('foto_ktp')->store('foto_ktp', 'public');
                 }
 
-                $orangTua = OrangTua::create([
-                    'id_user'       => $user->id,
-                    'nik'           => $request->nik,
-                    'nama_orangtua' => $request->nama,
-                    'no_telp'       => $request->no_telp,
-                    'alamat'        => $request->alamat,
-                    'pekerjaan'     => $request->pekerjaan,
-                    'hubungan'      => $request->hubungan,
-                    'nama_anak'     => $request->nama_anak,
-                    'kelas_anak'    => $request->kelas_anak,
-                    'foto_ktp'      => $fotoKtpPath,
-                ]);
-
-                $kelas = Kelas::where('nama_kelas', $request->kelas_anak)->first();
-
-                if (!$kelas) {
-                    DB::rollBack();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Kelas "' . $request->kelas_anak . '" tidak ditemukan. Pastikan nama kelas sesuai.',
-                    ], 422);
-                }
-
-                Anak::create([
-                    'id_kelas'      => $kelas->id_kelas,
-                    'id_orangtua'   => $orangTua->id_orangtua,
-                    'nama_anak'     => $request->nama_anak,
-                    'jenis_kelamin' => $request->jenis_kelamin ?? null,
-                    'tanggal_lahir' => $request->tanggal_lahir_anak,
+                OrangTua::create([
+                    'id_user'            => $user->id,
+                    'nik'                => $request->nik,
+                    'nama_orangtua'      => $request->nama,
+                    'no_telp'            => $request->no_telp,
+                    'alamat'             => $request->alamat,
+                    'pekerjaan'          => $request->pekerjaan,
+                    'hubungan'           => $request->hubungan,
+                    'nama_anak'          => $request->nama_anak,
+                    'kelas_anak'         => $request->kelas_anak,
+                    'tanggal_lahir_anak' => $request->tanggal_lahir_anak,
+                    'foto_ktp'           => $fotoKtpPath,
                 ]);
             }
 
@@ -144,7 +127,6 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // ← PERUBAHAN: cukup 1 pengecekan, hanya 'approved' yang bisa login
         if ($user->status !== 'approved') {
             return response()->json([
                 'success' => false,
@@ -207,11 +189,13 @@ class AuthController extends Controller
         if ($user->role === 'guru') {
             $rules['nama']          = 'required|string';
             $rules['nik']           = 'required|string|size:16';
+            $rules['nip']           = 'nullable|string';
             $rules['no_telp']       = 'nullable|string';
             $rules['alamat']        = 'nullable|string';
             $rules['jabatan']       = 'nullable|string';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tanggal_lahir'] = 'nullable|date';
+            $rules['foto_ttd']      = 'nullable|image|mimes:jpg,jpeg,png|max:2048';
         }
 
         $request->validate($rules);
@@ -224,16 +208,27 @@ class AuthController extends Controller
         $user->save();
 
         if ($user->role === 'guru') {
-            $user->guru()->update([
+            $guruData = [
                 'nama_guru'     => $request->nama,
                 'nik'           => $request->nik,
+                'nip'           => $request->nip,
                 'no_telp'       => $request->no_telp,
                 'alamat'        => $request->alamat,
                 'jabatan'       => $request->jabatan,
                 'jenis_kelamin' => $request->jenis_kelamin,
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'email'         => $request->email,
-            ]);
+            ];
+
+            if ($request->hasFile('foto_ttd')) {
+                $guru = $user->guru;
+                if ($guru && $guru->foto_ttd) {
+                    Storage::disk('public')->delete($guru->foto_ttd);
+                }
+                $guruData['foto_ttd'] = $request->file('foto_ttd')->store('ttd', 'public');
+            }
+
+            $user->guru()->update($guruData);
         }
 
         return response()->json([

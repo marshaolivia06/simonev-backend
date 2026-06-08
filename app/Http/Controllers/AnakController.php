@@ -8,16 +8,19 @@ use Illuminate\Http\Request;
 class AnakController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Anak::with('kelas', 'orangTua.user');
+    {
+        $query = Anak::with('kelas', 'orangTua.user')
+            ->whereHas('orangTua.user', function ($q) {
+                $q->where('status', 'approved');
+            });
 
-    if ($request->has('id_kelas')) {
-        $query->where('id_kelas', $request->id_kelas);
+        if ($request->has('id_kelas')) {
+            $query->where('id_kelas', $request->id_kelas);
+        }
+
+        $data = $query->get();
+        return response()->json(['success' => true, 'data' => $data]);
     }
-
-    $data = $query->get();
-    return response()->json(['success' => true, 'data' => $data]);
-}
 
     public function store(Request $request)
     {

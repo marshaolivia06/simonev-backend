@@ -20,6 +20,18 @@ Route::get('/pengumuman/{id}',  [PengumumanController::class, 'show']);
 
 Route::get('/kelas', [KelasController::class, 'index']);
 
+// Serve file storage lewat API (bypass CORS)
+Route::get('/storage-file/{folder}/{filename}', function ($folder, $filename) {
+    $path = storage_path("app/public/{$folder}/{$filename}");
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path, [
+        'Access-Control-Allow-Origin' => '*',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
@@ -28,8 +40,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profil',   [AuthController::class, 'updateProfile']);
 
     // Guru
-    Route::get('/dashboard-guru', [GuruController::class, 'dashboard']);
-    Route::get('/guru',           [GuruController::class, 'index']);
+    Route::get('/dashboard-guru',             [GuruController::class, 'dashboard']);
+    Route::get('/guru',                       [GuruController::class, 'index']);
+    Route::get('/guru/by-kelas/{id_kelas}',   function ($id_kelas) {
+        $kelas = \App\Models\Kelas::find($id_kelas);
+        if (!$kelas || !$kelas->wali_kelas) {
+            return response()->json(['success' => false, 'data' => null]);
+        }
+        $guru = \App\Models\Guru::where('nama_guru', $kelas->wali_kelas)->first();
+        return response()->json(['success' => true, 'data' => $guru]);
+    });
     Route::get('/guru/{id}',      [GuruController::class, 'show']);
     Route::put('/guru/{guru}',    [GuruController::class, 'update']);
     Route::delete('/guru/{guru}', [GuruController::class, 'destroy']);
@@ -48,11 +68,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/anak/{id}', [AnakController::class, 'destroy']);
 
     // Orang Tua
-    Route::get('/orang-tua',         [OrangTuaController::class, 'index']);
-    Route::get('/orang-tua/profil/anak', [OrangTuaController::class, 'profilAnak']); 
-    Route::get('/orang-tua/{id}',    [OrangTuaController::class, 'show']);
-    Route::put('/orang-tua/{id}',    [OrangTuaController::class, 'update']);
-    Route::delete('/orang-tua/{id}', [OrangTuaController::class, 'destroy']);
+    Route::get('/orang-tua',                 [OrangTuaController::class, 'index']);
+    Route::get('/orang-tua/profil/anak',     [OrangTuaController::class, 'profilAnak']);
+    Route::get('/orang-tua/{id}',            [OrangTuaController::class, 'show']);
+    Route::put('/orang-tua/{id}',            [OrangTuaController::class, 'update']);
+    Route::delete('/orang-tua/{id}',         [OrangTuaController::class, 'destroy']);
 
     // Profil Sekolah
     Route::get('/profil-sekolah', [ProfilSekolahController::class, 'show']);
@@ -62,30 +82,30 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/verifikasi',              [VerifikasiController::class, 'index']);
     Route::post('/verifikasi/{id}/accept', [VerifikasiController::class, 'accept']);
     Route::post('/verifikasi/{id}/reject', [VerifikasiController::class, 'reject']);
-    Route::delete('/verifikasi/{id}', [VerifikasiController::class, 'destroy']);
+    Route::delete('/verifikasi/{id}',      [VerifikasiController::class, 'destroy']);
 
     // Aspek Perkembangan
-    Route::get('/aspek',          [AspekPerkembanganController::class, 'index']);
-    Route::post('/aspek',         [AspekPerkembanganController::class, 'store']);
-    Route::get('/aspek/{id}',     [AspekPerkembanganController::class, 'show']);
-    Route::put('/aspek/{id}',     [AspekPerkembanganController::class, 'update']);
-    Route::delete('/aspek/{id}',  [AspekPerkembanganController::class, 'destroy']);
+    Route::get('/aspek',         [AspekPerkembanganController::class, 'index']);
+    Route::post('/aspek',        [AspekPerkembanganController::class, 'store']);
+    Route::get('/aspek/{id}',    [AspekPerkembanganController::class, 'show']);
+    Route::put('/aspek/{id}',    [AspekPerkembanganController::class, 'update']);
+    Route::delete('/aspek/{id}', [AspekPerkembanganController::class, 'destroy']);
 
     // Indikator Penilaian
-    Route::get('/indikator',          [IndikatorPenilaianController::class, 'index']);
-    Route::post('/indikator',         [IndikatorPenilaianController::class, 'store']);
-    Route::get('/indikator/{id}',     [IndikatorPenilaianController::class, 'show']);
-    Route::put('/indikator/{id}',     [IndikatorPenilaianController::class, 'update']);
-    Route::delete('/indikator/{id}',  [IndikatorPenilaianController::class, 'destroy']);
+    Route::get('/indikator',         [IndikatorPenilaianController::class, 'index']);
+    Route::post('/indikator',        [IndikatorPenilaianController::class, 'store']);
+    Route::get('/indikator/{id}',    [IndikatorPenilaianController::class, 'show']);
+    Route::put('/indikator/{id}',    [IndikatorPenilaianController::class, 'update']);
+    Route::delete('/indikator/{id}', [IndikatorPenilaianController::class, 'destroy']);
 
     // Observasi
-    Route::get('/observasi',                [ObservasiController::class, 'index']);
-    Route::post('/observasi',               [ObservasiController::class, 'store']);
-    Route::post('/observasi/batch', [ObservasiController::class, 'storeBatch']);
-    Route::get('/observasi/anak/{id_anak}', [ObservasiController::class, 'byAnak']);
-    Route::get('/observasi/{id}',           [ObservasiController::class, 'show']);
-    Route::put('/observasi/{id}',           [ObservasiController::class, 'update']);
-    Route::delete('/observasi/{id}',        [ObservasiController::class, 'destroy']);
+    Route::get('/observasi',                 [ObservasiController::class, 'index']);
+    Route::post('/observasi',                [ObservasiController::class, 'store']);
+    Route::post('/observasi/batch',          [ObservasiController::class, 'storeBatch']);
+    Route::get('/observasi/anak/{id_anak}',  [ObservasiController::class, 'byAnak']);
+    Route::get('/observasi/{id}',            [ObservasiController::class, 'show']);
+    Route::put('/observasi/{id}',            [ObservasiController::class, 'update']);
+    Route::delete('/observasi/{id}',         [ObservasiController::class, 'destroy']);
 
     // Pengumuman
     Route::post('/pengumuman',        [PengumumanController::class, 'store']);

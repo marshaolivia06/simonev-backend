@@ -1,7 +1,10 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Anak;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 
 class VerifikasiController extends Controller
@@ -45,6 +48,20 @@ class VerifikasiController extends Controller
 
         $user->update(['status' => 'approved']);
 
+        if ($user->role === 'orang_tua') {
+            $orangTua = $user->orangTua;
+            $kelas    = Kelas::where('nama_kelas', $orangTua->kelas_anak)->first();
+
+            if ($kelas && $orangTua) {
+                Anak::create([
+                    'id_kelas'      => $kelas->id_kelas,
+                    'id_orangtua'   => $orangTua->id_orangtua,
+                    'nama_anak'     => $orangTua->nama_anak,
+                    'tanggal_lahir' => $orangTua->tanggal_lahir_anak,
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => "Akun {$user->username} berhasil diverifikasi.",
@@ -76,13 +93,13 @@ class VerifikasiController extends Controller
     }
 
     public function destroy($id)
-{
-    $user = User::findOrFail($id);
-    $user->delete();
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Akun berhasil dihapus.',
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Akun berhasil dihapus.',
+        ]);
+    }
 }
