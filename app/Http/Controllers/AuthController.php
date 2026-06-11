@@ -91,6 +91,7 @@ class AuthController extends Controller
                     'nama_anak'          => $request->nama_anak,
                     'kelas_anak'         => $request->kelas_anak,
                     'tanggal_lahir_anak' => $request->tanggal_lahir_anak,
+                    'jenis_kelamin_anak' => $request->jenis_kelamin_anak,
                     'foto_ktp'           => $fotoKtpPath,
                 ]);
             }
@@ -195,6 +196,7 @@ class AuthController extends Controller
             $rules['jabatan']       = 'nullable|string';
             $rules['jenis_kelamin'] = 'nullable|in:L,P';
             $rules['tanggal_lahir'] = 'nullable|date';
+            $rules['jenis_kelamin_anak'] = 'nullable|in:L,P';
             $rules['foto_ttd']      = 'nullable|image|mimes:jpg,jpeg,png|max:2048';
         }
 

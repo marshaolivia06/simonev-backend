@@ -7,13 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 class Observasi extends Model
 {
     protected $table = 'observasi';
-    protected $primaryKey = 'id_observasi';
-    protected $fillable = ['id_guru', 'id_anak', 'id_indikator', 'semester', 'tanggal', 'nilai', 'komentar', 'foto'];
 
-    public function guru()
-    {
-        return $this->belongsTo(Guru::class, 'id_guru');
-    }
+    protected $fillable = [
+        'id_anak',
+        'id_indikator',
+        'id_guru',
+        'nilai',
+        'komentar',
+        'keterangan_aspek', // [BARU] JSON per aspek
+        'foto',
+        'tanggal',
+        'semester',
+    ];
+
+    /**
+     * Cast keterangan_aspek dari JSON string → PHP array otomatis
+     * sehingga bisa langsung diakses sebagai array di controller
+     */
+    protected $casts = [
+        'keterangan_aspek' => 'array',
+    ];
+
+    // ── Relasi ───────────────────────────────────────────────────
 
     public function anak()
     {
@@ -22,6 +37,12 @@ class Observasi extends Model
 
     public function indikator()
     {
-        return $this->belongsTo(IndikatorPenilaian::class, 'id_indikator');
+        return $this->belongsTo(IndikatorPenilaian::class, 'id_indikator')
+            ->with('aspek'); // eager load aspek supaya bisa diakses via indikator.aspek
+    }
+
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class, 'id_guru');
     }
 }

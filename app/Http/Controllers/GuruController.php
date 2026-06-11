@@ -97,60 +97,117 @@ class GuruController extends Controller
     }
 
     public function dashboard(Request $request)
-{
-    $guru = $request->user();
+    {
+        $guru = $request->user();
 
-    $namaGuru = $guru->guru->nama_guru ?? null;
-$kelas = \App\Models\Kelas::where('wali_kelas', $namaGuru)->first();
+        $namaGuru = $guru->guru->nama_guru ?? null;
+        $kelas = \App\Models\Kelas::where('wali_kelas', $namaGuru)->first();
 
-    if (!$kelas) {
+        if (!$kelas) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'nama_kelas' => null,
+                    'total_anak' => 0,
+                    'BB' => 0, 'MB' => 0, 'BSH' => 0, 'BSB' => 0,
+                    'belum_dinilai' => 0,
+                ]
+            ]);
+        }
+
+        $anakList  = \App\Models\Anak::where('id_kelas', $kelas->id_kelas)->pluck('id_anak');
+        $totalAnak = $anakList->count();
+
+        // Semua observasi anak di kelas ini
+        $semuaObservasi = \App\Models\Observasi::whereIn('id_anak', $anakList)
+            ->select('id_anak', 'nilai')
+            ->get();
+
+        $nilaiOrder = ['BB' => 1, 'MB' => 2, 'BSH' => 3, 'BSB' => 4];
+        $labelOrder = ['BB', 'MB', 'BSH', 'BSB']; // index 0-3
+
+        // Hitung nilai dominan per anak (rata-rata semua observasi)
+        $nilaiPerAnak = $semuaObservasi
+            ->groupBy('id_anak')
+            ->map(function ($obs) use ($nilaiOrder, $labelOrder) {
+                $rata = $obs->pluck('nilai')
+                    ->filter()
+                    ->map(fn($n) => $nilaiOrder[$n] ?? 0)
+                    ->avg();
+                return $rata ? $labelOrder[(int) round($rata) - 1] : null;
+            })
+            ->filter(); // buang anak yang belum ada nilai
+
+        $counts = $nilaiPerAnak->countBy()->all();
+
         return response()->json([
             'success' => true,
             'data' => [
-                'nama_kelas' => null,
-                'total_anak' => 0,
-                'BB' => 0, 'MB' => 0, 'BSH' => 0, 'BSB' => 0,
-                'belum_dinilai' => 0,
+                'nama_kelas'    => $kelas->nama_kelas,
+                'total_anak'    => $totalAnak,
+                'BB'            => $counts['BB']  ?? 0,
+                'MB'            => $counts['MB']  ?? 0,
+                'BSH'           => $counts['BSH'] ?? 0,
+                'BSB'           => $counts['BSB'] ?? 0,
+                'belum_dinilai' => $totalAnak - $nilaiPerAnak->count(),
             ]
         ]);
     }
 
-    $anakList  = \App\Models\Anak::where('id_kelas', $kelas->id_kelas)->pluck('id_anak');
-    $totalAnak = $anakList->count();
+    /**
+     * Mengembalikan daftar anak berdasarkan skala perkembangan (BB/MB/BSH/BSB)
+     * untuk kelas guru yang sedang login. Logic perhitungan nilai dominan
+     * sama persis dengan method dashboard().
+     */
+    public function anakBySkala(Request $request)
+    {
+        $request->validate([
+            'skala' => 'required|in:BB,MB,BSH,BSB',
+        ]);
 
-    // Semua observasi anak di kelas ini
-    $semuaObservasi = \App\Models\Observasi::whereIn('id_anak', $anakList)
-        ->select('id_anak', 'nilai')
-        ->get();
+        $skala = $request->input('skala');
+        $guru = $request->user();
 
-    $nilaiOrder = ['BB' => 1, 'MB' => 2, 'BSH' => 3, 'BSB' => 4];
-    $labelOrder = ['BB', 'MB', 'BSH', 'BSB']; // index 0-3
+        $namaGuru = $guru->guru->nama_guru ?? null;
+        $kelas = \App\Models\Kelas::where('wali_kelas', $namaGuru)->first();
 
-    // Hitung nilai dominan per anak (rata-rata semua observasi)
-    $nilaiPerAnak = $semuaObservasi
-        ->groupBy('id_anak')
-        ->map(function ($obs) use ($nilaiOrder, $labelOrder) {
-            $rata = $obs->pluck('nilai')
-                ->filter()
-                ->map(fn($n) => $nilaiOrder[$n] ?? 0)
-                ->avg();
-            return $rata ? $labelOrder[(int) round($rata) - 1] : null;
-        })
-        ->filter(); // buang anak yang belum ada nilai
+        if (!$kelas) {
+            return response()->json(['success' => true, 'data' => []]);
+        }
 
-    $counts = $nilaiPerAnak->countBy()->all();
+        $anakList = \App\Models\Anak::where('id_kelas', $kelas->id_kelas)
+            ->select('id_anak', 'nama_anak')
+            ->get();
 
-    return response()->json([
-        'success' => true,
-        'data' => [
-            'nama_kelas'    => $kelas->nama_kelas,
-            'total_anak'    => $totalAnak,
-            'BB'            => $counts['BB']  ?? 0,
-            'MB'            => $counts['MB']  ?? 0,
-            'BSH'           => $counts['BSH'] ?? 0,
-            'BSB'           => $counts['BSB'] ?? 0,
-            'belum_dinilai' => $totalAnak - $nilaiPerAnak->count(),
-        ]
-    ]);
-}
+        $semuaObservasi = \App\Models\Observasi::whereIn('id_anak', $anakList->pluck('id_anak'))
+            ->select('id_anak', 'nilai')
+            ->get();
+
+        $nilaiOrder = ['BB' => 1, 'MB' => 2, 'BSH' => 3, 'BSB' => 4];
+        $labelOrder = ['BB', 'MB', 'BSH', 'BSB'];
+
+        // Hitung nilai dominan (rata-rata) per anak, sama seperti di dashboard()
+        $nilaiPerAnak = $semuaObservasi
+            ->groupBy('id_anak')
+            ->map(function ($obs) use ($nilaiOrder, $labelOrder) {
+                $rata = $obs->pluck('nilai')
+                    ->filter()
+                    ->map(fn($n) => $nilaiOrder[$n] ?? 0)
+                    ->avg();
+                return $rata ? $labelOrder[(int) round($rata) - 1] : null;
+            })
+            ->filter();
+
+        // Ambil id_anak yang nilai rata-ratanya == skala yang diminta
+        $idAnakTerpilih = $nilaiPerAnak->filter(fn($v) => $v === $skala)->keys();
+
+        $hasil = $anakList->whereIn('id_anak', $idAnakTerpilih)
+            ->map(fn($a) => [
+                'id_anak'   => $a->id_anak,
+                'nama_anak' => $a->nama_anak,
+            ])
+            ->values();
+
+        return response()->json(['success' => true, 'data' => $hasil]);
+    }
 }

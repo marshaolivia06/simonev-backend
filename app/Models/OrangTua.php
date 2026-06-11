@@ -11,7 +11,8 @@ class OrangTua extends Model
     protected $fillable = [
     'id_user', 'nik', 'nama_orangtua', 'no_telp', 
     'alamat', 'pekerjaan', 'hubungan', 'nama_anak', 
-    'kelas_anak', 'foto_ktp'
+    'kelas_anak', 'foto_ktp', 'tanggal_lahir_anak',
+    'jenis_kelamin_anak',
 ];
 
     public function user()

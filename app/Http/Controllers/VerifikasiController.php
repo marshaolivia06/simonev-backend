@@ -58,6 +58,7 @@ class VerifikasiController extends Controller
                     'id_orangtua'   => $orangTua->id_orangtua,
                     'nama_anak'     => $orangTua->nama_anak,
                     'tanggal_lahir' => $orangTua->tanggal_lahir_anak,
+                    'jenis_kelamin' => $orangTua->jenis_kelamin_anak,
                 ]);
             }
         }

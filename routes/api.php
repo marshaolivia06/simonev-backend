@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Guru
     Route::get('/dashboard-guru',             [GuruController::class, 'dashboard']);
+    Route::get('/dashboard-guru/anak-by-skala', [GuruController::class, 'anakBySkala']);
     Route::get('/guru',                       [GuruController::class, 'index']);
     Route::get('/guru/by-kelas/{id_kelas}',   function ($id_kelas) {
         $kelas = \App\Models\Kelas::find($id_kelas);
