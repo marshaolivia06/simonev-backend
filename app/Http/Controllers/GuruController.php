@@ -7,6 +7,12 @@ use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
 {
+     /**
+     * Ambil semua data guru.
+     *
+     * Mengembalikan daftar seluruh guru yang sudah diverifikasi admin, diurutkan berdasarkan nama.
+     */
+
     public function index()
     {
         $data = Guru::with('user')
@@ -19,12 +25,24 @@ class GuruController extends Controller
 
         return response()->json(['success' => true, 'data' => $data]);
     }
+    
+    /**
+     * Ambil detail data guru.
+     *
+     * Mengembalikan data detail guru berdasarkan ID beserta relasi user dan observasi.
+     */
 
     public function show($id)
     {
-        $data = Guru::with('user', 'kelas', 'observasi')->findOrFail($id);
+        $data = Guru::with('user', 'observasi')->findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Tambah data guru baru.
+     *
+     * Menyimpan data guru baru ke database.
+     */
 
     public function store(Request $request)
     {
@@ -59,6 +77,12 @@ class GuruController extends Controller
         ], 201);
     }
 
+    /**
+     * Update data guru.
+     *
+     * Mengubah data guru berdasarkan ID.
+     */
+
     public function update(Request $request, Guru $guru)
     {
         $request->validate([
@@ -87,6 +111,12 @@ class GuruController extends Controller
         ]);
     }
 
+    /**
+     * Hapus data guru.
+     *
+     * Menghapus data guru berdasarkan ID dari database.
+     */
+
     public function destroy(Guru $guru)
     {
         $guru->delete();
@@ -95,6 +125,13 @@ class GuruController extends Controller
             'message' => 'Data guru berhasil dihapus.',
         ]);
     }
+
+    /**
+     * Ambil data dashboard guru.
+     *
+     * Mengembalikan ringkasan data kelas guru yang sedang login,
+     * termasuk total anak dan jumlah per skala perkembangan BB/MB/BSH/BSB.
+     */
 
     public function dashboard(Request $request)
     {
@@ -155,10 +192,12 @@ class GuruController extends Controller
     }
 
     /**
-     * Mengembalikan daftar anak berdasarkan skala perkembangan (BB/MB/BSH/BSB)
-     * untuk kelas guru yang sedang login. Logic perhitungan nilai dominan
-     * sama persis dengan method dashboard().
+     * Ambil daftar anak berdasarkan skala perkembangan.
+     *
+     * Mengembalikan daftar anak di kelas guru yang sedang login
+     * berdasarkan skala perkembangan tertentu (BB, MB, BSH, atau BSB).
      */
+    
     public function anakBySkala(Request $request)
     {
         $request->validate([
@@ -209,5 +248,20 @@ class GuruController extends Controller
             ->values();
 
         return response()->json(['success' => true, 'data' => $hasil]);
+    }
+
+    /**
+     * Ambil guru berdasarkan kelas.
+     *
+     * Mengembalikan data guru yang menjadi wali kelas berdasarkan ID kelas.
+     */
+    public function byKelas($id_kelas)
+    {
+        $kelas = \App\Models\Kelas::find($id_kelas);
+        if (!$kelas || !$kelas->wali_kelas) {
+            return response()->json(['success' => false, 'data' => null]);
+        }
+        $guru = \App\Models\Guru::where('nama_guru', $kelas->wali_kelas)->first();
+        return response()->json(['success' => true, 'data' => $guru]);
     }
 }

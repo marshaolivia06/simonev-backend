@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class AnakController extends Controller
 {
+    /**
+     * Ambil semua data anak.
+     *
+     * Mengembalikan daftar seluruh anak yang orang tuanya sudah diverifikasi admin,
+     * bisa difilter berdasarkan id_kelas.
+     */
+
     public function index(Request $request)
     {
         $query = Anak::with('kelas', 'orangTua.user')
@@ -22,6 +29,12 @@ class AnakController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
+     /**
+     * Tambah data anak baru.
+     *
+     * Menyimpan data anak baru ke database beserta relasi kelas dan orang tua.
+     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -36,11 +49,23 @@ class AnakController extends Controller
         return response()->json(['success' => true, 'data' => $data], 201);
     }
 
+    /**
+     * Ambil detail data anak.
+     *
+     * Mengembalikan data detail anak berdasarkan ID beserta relasi kelas, orang tua, dan observasi.
+     */
+
     public function show($id)
     {
         $data = Anak::with('kelas', 'orangTua.user', 'observasi')->findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Update data anak.
+     *
+     * Mengubah data anak berdasarkan ID.
+     */
 
     public function update(Request $request, $id)
     {
@@ -48,6 +73,12 @@ class AnakController extends Controller
         $data->update($request->all());
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Hapus data anak.
+     *
+     * Menghapus data anak berdasarkan ID dari database.
+     */
 
     public function destroy($id)
     {

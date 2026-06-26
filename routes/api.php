@@ -11,6 +11,7 @@ use App\Http\Controllers\AspekPerkembanganController;
 use App\Http\Controllers\IndikatorPenilaianController;
 use App\Http\Controllers\ObservasiController;
 use App\Http\Controllers\PengumumanController;
+use App\Http\Controllers\StorageController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
@@ -20,17 +21,7 @@ Route::get('/pengumuman/{id}',  [PengumumanController::class, 'show']);
 
 Route::get('/kelas', [KelasController::class, 'index']);
 
-// Serve file storage lewat API (bypass CORS)
-Route::get('/storage-file/{folder}/{filename}', function ($folder, $filename) {
-    $path = storage_path("app/public/{$folder}/{$filename}");
-    if (!file_exists($path)) {
-        abort(404);
-    }
-    return response()->file($path, [
-        'Access-Control-Allow-Origin' => '*',
-        'Cache-Control' => 'public, max-age=86400',
-    ]);
-});
+Route::get('/storage-file/{folder}/{filename}', [StorageController::class, 'serveFile']);
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -40,20 +31,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profil',   [AuthController::class, 'updateProfile']);
 
     // Guru
-    Route::get('/dashboard-guru',             [GuruController::class, 'dashboard']);
+    Route::get('/dashboard-guru',               [GuruController::class, 'dashboard']);
     Route::get('/dashboard-guru/anak-by-skala', [GuruController::class, 'anakBySkala']);
-    Route::get('/guru',                       [GuruController::class, 'index']);
-    Route::get('/guru/by-kelas/{id_kelas}',   function ($id_kelas) {
-        $kelas = \App\Models\Kelas::find($id_kelas);
-        if (!$kelas || !$kelas->wali_kelas) {
-            return response()->json(['success' => false, 'data' => null]);
-        }
-        $guru = \App\Models\Guru::where('nama_guru', $kelas->wali_kelas)->first();
-        return response()->json(['success' => true, 'data' => $guru]);
-    });
-    Route::get('/guru/{id}',      [GuruController::class, 'show']);
-    Route::put('/guru/{guru}',    [GuruController::class, 'update']);
-    Route::delete('/guru/{guru}', [GuruController::class, 'destroy']);
+    Route::get('/guru',                         [GuruController::class, 'index']);
+    Route::get('/guru/by-kelas/{id_kelas}',     [GuruController::class, 'byKelas']); // ← ganti ini
+    Route::get('/guru/{id}',                    [GuruController::class, 'show']);
+    Route::put('/guru/{guru}',                  [GuruController::class, 'update']);
+    Route::delete('/guru/{guru}',               [GuruController::class, 'destroy']);
 
     // Kelas
     Route::get('/kelas/{id}',      [KelasController::class, 'show']);

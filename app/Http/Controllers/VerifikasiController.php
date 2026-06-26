@@ -9,7 +9,13 @@ use Illuminate\Http\Request;
 
 class VerifikasiController extends Controller
 {
-    // GET /api/verifikasi
+    /**
+     * Ambil semua data pengguna untuk verifikasi.
+     *
+     * Mengembalikan daftar seluruh pengguna non-admin beserta detail guru atau orang tua,
+     * diurutkan dari yang terbaru.
+     */
+
     public function index()
     {
         $data = User::with(['guru', 'orangTua'])
@@ -34,7 +40,13 @@ class VerifikasiController extends Controller
         return response()->json(['success' => true, 'data' => $data]);
     }
 
-    // POST /api/verifikasi/{id}/accept
+     /**
+     * Terima pendaftaran akun.
+     *
+     * Mengubah status akun pengguna menjadi approved. Jika role orang tua,
+     * data anak akan otomatis dibuat dan dimasukkan ke kelas yang sesuai.
+     */
+
     public function accept($id)
     {
         $user = User::findOrFail($id);
@@ -69,7 +81,12 @@ class VerifikasiController extends Controller
         ]);
     }
 
-    // POST /api/verifikasi/{id}/reject
+    /**
+     * Tolak pendaftaran akun.
+     *
+     * Mengubah status akun pengguna menjadi rejected beserta alasan penolakan.
+     */
+
     public function reject(Request $request, $id)
     {
         $request->validate([
@@ -92,6 +109,12 @@ class VerifikasiController extends Controller
             'message' => "Akun {$user->username} berhasil ditolak.",
         ]);
     }
+
+    /**
+     * Hapus akun pengguna.
+     *
+     * Menghapus data akun pengguna berdasarkan ID dari database.
+     */
 
     public function destroy($id)
     {

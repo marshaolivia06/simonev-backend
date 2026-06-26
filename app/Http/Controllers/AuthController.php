@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+     /**
+     * Ambil daftar kelas.
+     *
+     * Mengembalikan seluruh data kelas yang tersedia di sistem.
+     */
+
     public function getKelas()
     {
         $kelas = Kelas::all(['id_kelas', 'nama_kelas']);
@@ -24,6 +30,13 @@ class AuthController extends Controller
             'data'    => $kelas,
         ]);
     }
+
+    /**
+     * Registrasi akun baru.
+     *
+     * Mendaftarkan pengguna baru dengan role guru atau orang tua,
+     * akun akan berstatus pending hingga diverifikasi admin.
+     */
 
     public function register(Request $request)
     {
@@ -112,6 +125,13 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Login pengguna.
+     *
+     * Autentikasi pengguna berdasarkan username dan password,
+     * mengembalikan Bearer token jika berhasil dan akun sudah diverifikasi.
+     */
+
     public function login(Request $request)
     {
         $request->validate([
@@ -149,6 +169,12 @@ class AuthController extends Controller
         ]);
     }
 
+     /**
+     * Logout pengguna.
+     *
+     * Menghapus token autentikasi pengguna yang sedang login.
+     */
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -158,6 +184,12 @@ class AuthController extends Controller
             'message' => 'Logout berhasil',
         ]);
     }
+
+    /**
+     * Ambil profil pengguna.
+     *
+     * Mengembalikan data profil pengguna yang sedang login beserta relasi guru atau orang tua.
+     */
 
     public function profile(Request $request)
     {
@@ -176,6 +208,12 @@ class AuthController extends Controller
             'data'    => $user,
         ]);
     }
+
+    /**
+     * Update profil pengguna.
+     *
+     * Memperbarui data profil pengguna yang sedang login termasuk data guru jika rolenya guru.
+     */
 
     public function updateProfile(Request $request)
     {

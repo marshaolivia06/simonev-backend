@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfilSekolahController extends Controller
 {
+    /**
+     * Ambil profil sekolah.
+     *
+     * Mengembalikan data profil sekolah yang tersimpan di database.
+     */
     public function show()
     {
         $profil = ProfilSekolah::first();
@@ -17,6 +22,13 @@ class ProfilSekolahController extends Controller
             'data'    => $profil,
         ]);
     }
+
+    /**
+     * Update profil sekolah.
+     *
+     * Memperbarui data profil sekolah termasuk upload foto tanda tangan kepala sekolah.
+     * Jika profil belum ada, data baru akan dibuat otomatis.
+     */
 
     public function update(Request $request)
     {

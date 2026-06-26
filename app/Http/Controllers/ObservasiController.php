@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ObservasiController extends Controller
 {
+    /**
+     * Ambil semua data observasi.
+     *
+     * Mengembalikan daftar seluruh observasi, bisa difilter berdasarkan id_anak dan semester.
+     */
+
     // ── GET /observasi ────────────────────────────────────────────
     public function index(Request $request)
     {
@@ -25,6 +31,12 @@ class ObservasiController extends Controller
 
         return response()->json(['success' => true, 'data' => $query->get()]);
     }
+
+    /**
+     * Tambah data observasi baru.
+     *
+     * Menyimpan satu data observasi perkembangan anak oleh guru, termasuk upload foto.
+     */
 
     // ── POST /observasi (single — termasuk upload foto) ───────────
     public function store(Request $request)
@@ -69,24 +81,13 @@ class ObservasiController extends Controller
         ], 201);
     }
 
-    // ── POST /observasi/batch ─────────────────────────────────────
     /**
-     * Payload yang diterima dari frontend:
-     * {
-     *   "id_anak": 1,
-     *   "semester": "Semester 1",
-     *   "tanggal": "2024-10-01",
-     *   "komentar": "Catatan umum guru",           ← komentar GLOBAL
-     *   "keterangan_aspek": {                      ← keterangan PER ASPEK [BARU]
-     *     "1": "Anak mulai menunjukkan...",
-     *     "2": "Sudah aktif bergerak..."
-     *   },
-     *   "penilaian": [
-     *     { "id_indikator": 5, "nilai": "BSH", "foto": "" },
-     *     { "id_indikator": 7, "nilai": "BSB", "foto": "" }
-     *   ]
-     * }
+     * Tambah observasi secara batch.
+     *
+     * Menyimpan beberapa observasi sekaligus untuk satu anak dalam satu sesi penilaian,
+     * beserta komentar global dan keterangan per aspek perkembangan.
      */
+
     public function storeBatch(Request $request)
     {
         $request->validate([
@@ -129,17 +130,14 @@ class ObservasiController extends Controller
         ], 201);
     }
 
-    // ── GET /observasi/anak/{id_anak}?semester=... ─────────────────
     /**
-     * Response untuk halaman laporan perkembangan.
-     * Mengembalikan:
-     * - anak (nama, kelas)
-     * - rekap_aspek (aspek, nilai rata2, jumlah)
-     * - riwayat (semua observasi detail)
-     * - komentar (komentar global — diambil dari observasi terbaru)
-     * - keterangan_aspek (dict id_aspek → teks keterangan) [BARU]
-     * - total
+     * Ambil rekap observasi per anak.
+     *
+     * Mengembalikan laporan perkembangan anak berdasarkan ID anak,
+     * berisi rekap per aspek, riwayat observasi, komentar, dan keterangan aspek.
+     * Bisa difilter berdasarkan semester.
      */
+
     public function byAnak(Request $request, $id_anak)
     {
         $semester = $request->query('semester');
@@ -189,11 +187,6 @@ class ObservasiController extends Controller
             }
         }
 
-        // ── [BARU] keterangan_aspek: merge dari semua baris observasi ──
-        // Karena keterangan_aspek disimpan identik di setiap baris sesi yang sama,
-        // cukup ambil dari observasi terbaru yang punya value non-kosong.
-        // Jika guru mengisi di beberapa sesi berbeda, semua akan di-merge
-        // (sesi terbaru menimpa aspek yang sama dari sesi lama).
         $keteranganAspekMerged = [];
         // Proses dari terlama ke terbaru supaya terbaru menimpa
         foreach ($observasiList->reverse() as $obs) {
@@ -235,12 +228,23 @@ class ObservasiController extends Controller
         ]);
     }
 
-    // ── GET /observasi/{id} ───────────────────────────────────────
+    /**
+     * Ambil detail observasi.
+     *
+     * Mengembalikan data detail observasi berdasarkan ID.
+     */
+
     public function show($id)
     {
         $observasi = Observasi::with(['anak', 'indikator.aspek', 'guru'])->findOrFail($id);
         return response()->json(['success' => true, 'data' => $observasi]);
     }
+
+    /**
+     * Update data observasi.
+     *
+     * Mengubah data observasi berdasarkan ID, termasuk update foto dan keterangan aspek.
+     */
 
     // ── PUT /observasi/{id} ───────────────────────────────────────
     public function update(Request $request, $id)
@@ -267,6 +271,12 @@ class ObservasiController extends Controller
 
         return response()->json(['success' => true, 'data' => $observasi]);
     }
+
+    /**
+     * Hapus data observasi.
+     *
+     * Menghapus data observasi berdasarkan ID beserta foto yang tersimpan.
+     */
 
     // ── DELETE /observasi/{id} ────────────────────────────────────
     public function destroy($id)

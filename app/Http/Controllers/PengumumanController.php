@@ -6,11 +6,25 @@ use Illuminate\Http\Request;
 
 class PengumumanController extends Controller
 {
+    /**
+     * Ambil semua pengumuman.
+     *
+     * Mengembalikan daftar seluruh pengumuman beserta data user pembuatnya,
+     * diurutkan dari yang terbaru.
+     */
+
     public function index()
     {
         $data = Pengumuman::with('user')->latest()->get();
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Tambah pengumuman baru.
+     *
+     * Menyimpan pengumuman baru ke database dengan kategori Kegiatan, Libur, Penting, atau Info.
+     * ID user diambil otomatis dari token pengguna yang sedang login.
+     */
 
     public function store(Request $request)
     {
@@ -32,11 +46,23 @@ class PengumumanController extends Controller
         return response()->json(['success' => true, 'data' => $data], 201);
     }
 
+    /**
+     * Ambil detail pengumuman.
+     *
+     * Mengembalikan data detail pengumuman berdasarkan ID beserta data user pembuatnya.
+     */
+
     public function show($id)
     {
         $data = Pengumuman::with('user')->findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Update pengumuman.
+     *
+     * Mengubah data pengumuman berdasarkan ID, semua field bersifat opsional.
+     */
 
     public function update(Request $request, $id)
     {
@@ -57,6 +83,12 @@ class PengumumanController extends Controller
 
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Hapus pengumuman.
+     *
+     * Menghapus data pengumuman berdasarkan ID dari database.
+     */
 
     public function destroy($id)
     {

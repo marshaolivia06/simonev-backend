@@ -7,6 +7,13 @@ use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
+    /**
+     * Ambil semua data kelas.
+     *
+     * Mengembalikan daftar kelas yang tersedia.
+     * Data yang dikembalikan disesuaikan berdasarkan role pengguna yang sedang login.
+     */
+
     public function index(Request $request)
 {
     $user = $request->user();
@@ -38,6 +45,12 @@ class KelasController extends Controller
     return response()->json(['success' => true, 'data' => []]);
 }
 
+    /**
+     * Tambah kelas baru.
+     *
+     * Menyimpan data kelas baru ke database beserta wali kelas dan tahun ajaran.
+     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -50,11 +63,23 @@ class KelasController extends Controller
         return response()->json(['success' => true, 'data' => $data], 201);
     }
 
+    /**
+     * Ambil detail kelas.
+     *
+     * Mengembalikan data detail kelas berdasarkan ID.
+     */
+
     public function show($id)
     {
         $data = Kelas::findOrFail($id);
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+     /**
+     * Update data kelas.
+     *
+     * Mengubah data kelas berdasarkan ID.
+     */
 
     public function update(Request $request, $id)
     {
@@ -62,6 +87,12 @@ class KelasController extends Controller
         $data->update($request->only(['nama_kelas', 'wali_kelas', 'tahun_ajaran']));
         return response()->json(['success' => true, 'data' => $data]);
     }
+
+    /**
+     * Hapus data kelas.
+     *
+     * Menghapus data kelas berdasarkan ID dari database.
+     */
 
     public function destroy($id)
     {
