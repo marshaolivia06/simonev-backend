@@ -6,8 +6,18 @@
 ## Luaran ATS
 
 * [Video Presentasi ATS](https://youtu.be/pjW2KmIVWP4?si=4neO-dHUH0NYWrXL)
-* [Laporan PBL](https://docs.google.com/document/d/1_XDl7s9WBO45R0qGsDq3AIw9KTa64gau/edit?usp=sharing&ouid=117190177584980087190&rtpof=true&sd=true)
-* [PPT](https://canva.link/7oxt95aq32paho9)
+* [Laporan PBL ATS](https://docs.google.com/document/d/1_XDl7s9WBO45R0qGsDq3AIw9KTa64gau/edit?usp=sharing&ouid=117190177584980087190&rtpof=true&sd=true)
+* [PPT ATS](https://canva.link/7oxt95aq32paho9)
+
+## Luaran AAS
+
+* Video Presentasi AAS (belum)
+* [Laporan PBL AAS](https://docs.google.com/document/d/1_XDl7s9WBO45R0qGsDq3AIw9KTa64gau/edit?usp=sharing&ouid=117190177584980087190&rtpof=true&sd=true)
+* [PPT AAS](https://canva.link/7oxt95aq32paho9)
+* Dokumen Pendukung (belum)
+* [Dokumen Pengujian](https://drive.google.com/drive/folders/1IDdjD6ymYqBHS_nxhuqZcS-AvaBuxVu6?usp=drive_link)
+* Video Demo (belum)
+
 
 ## TEAM
 
