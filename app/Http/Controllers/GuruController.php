@@ -137,8 +137,8 @@ class GuruController extends Controller
     {
         $guru = $request->user();
 
-        $namaGuru = $guru->guru->nama_guru ?? null;
-        $kelas = \App\Models\Kelas::where('wali_kelas', $namaGuru)->first();
+        $idGuru = $guru->guru->id_guru ?? null;
+        $kelas = \App\Models\Kelas::where('id_guru', $idGuru)->first();
 
         if (!$kelas) {
             return response()->json([
@@ -207,8 +207,8 @@ class GuruController extends Controller
         $skala = $request->input('skala');
         $guru = $request->user();
 
-        $namaGuru = $guru->guru->nama_guru ?? null;
-        $kelas = \App\Models\Kelas::where('wali_kelas', $namaGuru)->first();
+        $idGuru = $guru->guru->id_guru ?? null;
+        $kelas = \App\Models\Kelas::where('id_guru', $idGuru)->first();
 
         if (!$kelas) {
             return response()->json(['success' => true, 'data' => []]);
@@ -258,10 +258,10 @@ class GuruController extends Controller
     public function byKelas($id_kelas)
     {
         $kelas = \App\Models\Kelas::find($id_kelas);
-        if (!$kelas || !$kelas->wali_kelas) {
+        if (!$kelas || !$kelas->id_guru) {
             return response()->json(['success' => false, 'data' => null]);
         }
-        $guru = \App\Models\Guru::where('nama_guru', $kelas->wali_kelas)->first();
+        $guru = \App\Models\Guru::find($kelas->id_guru);
         return response()->json(['success' => true, 'data' => $guru]);
     }
 }

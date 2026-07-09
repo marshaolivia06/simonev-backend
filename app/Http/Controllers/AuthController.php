@@ -200,8 +200,8 @@ class AuthController extends Controller
         }
 
         if ($user->role === 'orang_tua') {
-            $user->load('orangTua.anak.kelas');
-        }
+    $user->load('orangTua.anak.kelas.guru');   // ← tambahkan .guru
+}
 
         return response()->json([
             'success' => true,
