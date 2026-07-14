@@ -16,7 +16,7 @@
 * [PPT AAS](https://canva.link/7oxt95aq32paho9)
 * [Dokumen Pendukung](https://drive.google.com/drive/folders/1wCF21jlqqgDOIkOW2BD-YN2H_K1samGQ)
 * [Dokumen Pengujian](https://drive.google.com/drive/folders/1IDdjD6ymYqBHS_nxhuqZcS-AvaBuxVu6?usp=drive_link)
-* [Video Demo](https://youtu.be/CfqhPbXxkEA?si=y2QxxPGQrATXU-7g)
+* [Video Demo](https://youtu.be/Lcic18oNyjw?feature=shared)
 
 ## TEAM
 
