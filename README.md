@@ -11,13 +11,12 @@
 
 ## Luaran AAS
 
-* Video Presentasi AAS (belum)
-* [Laporan PBL AAS](https://docs.google.com/document/d/1_XDl7s9WBO45R0qGsDq3AIw9KTa64gau/edit?usp=sharing&ouid=117190177584980087190&rtpof=true&sd=true)
+* [Video Presentasi AAS](https://youtu.be/dzLOqXqVX2g?si=8kaszzIT0MPPKLhr)
+* [Laporan PBL AAS](https://drive.google.com/file/d/13DyLaHBrZdjdXeIF3FTf5HN1W6ma8dM-/view?usp=sharing)
 * [PPT AAS](https://canva.link/7oxt95aq32paho9)
-* Dokumen Pendukung (belum)
+* [Dokumen Pendukung](https://drive.google.com/drive/folders/1wCF21jlqqgDOIkOW2BD-YN2H_K1samGQ)
 * [Dokumen Pengujian](https://drive.google.com/drive/folders/1IDdjD6ymYqBHS_nxhuqZcS-AvaBuxVu6?usp=drive_link)
-* Video Demo (belum)
-
+* [Video Demo](https://youtu.be/Lcic18oNyjw?feature=shared)
 
 ## TEAM
 
